@@ -1,66 +1,41 @@
-import { Api, JsonRpc, RpcError, JsSignatureProvider } from 'ineryjs';
-const Create = async (id, user, data) => {
-try {
-    const hashtx = await Userapi.transact(
-      {
-        actions: [
-          {
-            account,
-            name: "create",
-            authorization: [
-              {
-                actor,
-                permission: "active",
-              },
-            ],
-            data: {
-              id,
-              user,
-              data,
-            },
-          },
-        ],
-      },
-      { broadcast: true, sign: true }
-    );
+const { Api, JsonRpc, RpcError } = require('ineryjs');
+const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');
+const { PrivateKey, PublicKey } = require('eosjs/dist/eosjs-keyconversions');
 
-    console.log(hashtx);
-  } catch (err) {
-    console.log(err);
-  }
+const privateKey = "YOUR_PRIVATE_KEY";
+const signatureProvider = new JsSignatureProvider([privateKey]);
+const rpc = new JsonRpc("http://localhost:8888", { fetch });
+const api = new Api({ rpc, signatureProvider });
+
+const account = "your_contract_account";
+const actor = "your_account_name";
+
+const pushTransaction = async (action) => {
+    try {
+        const response = await api.transact({
+            actions: [{
+                account: account,
+                name: "your_action_name",
+                authorization: [{
+                    actor: actor,
+                    permission: "active"
+                }],
+                data: action
+            }]
+        }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+        });
+        console.log(response);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+const actionData = {
+    id: "10543230",
+    user: "your_account_name",
+    data: "inery task4"
 };
 
-const Read = async (id) => {
-  try {
-    const hashId = await Userapi.transact(
-      {
-        actions: [
-          {
-            account,
-            name: "read",
-            authorization: [
-              {
-                actor,
-                permission: "active",
-              },
-            ],
-            data: {
-              id,
-            },
-          },
-        ],
-      },
-      { broadcast: true, sign: true }
-    );
-    console.log(hashId);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const Push = async (HasId, user, data) => {
-  await Create(HasId, user, data);
-  await Read(HasId);
-};
-
-Push(10543230, account, "inery task4");
+pushTransaction(actionData);
